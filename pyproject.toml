@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "finite-memory-law"
 version = "0.1.0"
-description = "Reproducible code for The Finite Memory Law (R = tau * Omega) simulation and CLI."
+description = "Reproducible code and CLI for The Finite Memory Law (R = tau * Omega)."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "CC0-1.0" }
@@ -21,3 +21,10 @@ fml = "fml.cli:main"
 
 [tool.setuptools]
 packages = ["fml"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
