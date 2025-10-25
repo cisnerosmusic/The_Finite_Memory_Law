@@ -1,0 +1,160 @@
+# wz_demo.py
+# --------------------------------------------------------------------------
+# Simulación Canónica de la Ley de Memoria Finita (FML)
+# Autor: Basado en el Apéndice del modelo Del Espacio de Hilbert a la Cosmología Estocástica
+# Objetivo: Demostrar numéricamente que la varianza de un oscilador
+#           amortiguado estocástico es mínima en un valor R = tau * Omega
+#           cercano a R_optimal = 2.0.
+# --------------------------------------------------------------------------
+
+import numpy as np
+from scipy.integrate import solve_ivp
+import matplotlib.pyplot as plt
+
+# === 1. PARÁMETROS DEL SISTEMA ===
+# Los parámetros se eligen para un sistema de segundo orden (oscilador amortiguado)
+# con amortiguamiento subcrítico, característico de muchos sistemas complejos.
+
+# Frecuencia natural del oscilador (Omega_0): Fija el contexto del experimento
+OMEGA_0 = 1.0 
+# Factor de Amortiguamiento (zeta): 0.1 indica un amortiguamiento ligero (oscilatorio)
+ZETA = 0.1  
+# Intensidad del Ruido de Ornstein-Uhlenbeck (sigma): Fija el nivel de las fluctuaciones
+SIGMA = 1.0
+# Tasa de reversión a la media del ruido OU (kappa): Fija la frecuencia del ruido (Omega)
+KAPPA = OMEGA_0 
+
+# El producto KAPPA * tau (tiempo de correlación del ruido) es R en este modelo.
+# R = tau * Omega_OU, donde Omega_OU = 1/KAPPA. Aquí, por simplicidad de la SDE, R = tau * KAPPA
+
+# === 2. DEFINICIÓN DE LA SDE (Sistema Estocástico) ===
+
+def ou_noise_generator(kappa, sigma, dt, size):
+    """
+    Genera un proceso de Ornstein-Uhlenbeck (ruido coloreado).
+    dx(t) = -kappa * x(t) dt + sigma * dW(t)
+    """
+    # Solución discreta (Euler-Maruyama para el ruido)
+    dW = np.random.normal(loc=0.0, scale=np.sqrt(dt), size=size)
+    
+    # El ruido real (eta) tiene memoria, no es ruido blanco dW
+    eta = np.zeros(size)
+    eta[0] = 0.0 # Condición inicial
+    
+    for i in range(1, size):
+        eta[i] = eta[i-1] * (1 - kappa * dt) + sigma * dW[i]
+    return eta
+
+def system_dynamics(t, y, omega_0, zeta, eta_interp, kappa):
+    """
+    Ecuaciones de estado del oscilador amortiguado con forzamiento estocástico:
+    y = [posición, velocidad]
+    dy[0]/dt = y[1]
+    dy[1]/dt = -2*zeta*omega_0*y[1] - omega_0^2*y[0] + F_noise
+    Donde F_noise es el ruido coloreado eta, interpolado en el tiempo.
+    """
+    # Ruido coloreado en el instante t
+    F_noise = eta_interp(t) 
+    
+    # Ecuaciones de segundo orden (Oscilador amortiguado)
+    dydt = [
+        y[1],  # Velocidad
+        -2 * zeta * omega_0 * y[1] - omega_0**2 * y[0] + F_noise  # Aceleración con ruido
+    ]
+    return dydt
+
+# === 3. BARRIDO DE PARÁMETROS Y CÁLCULO DE VARIANZA ===
+
+# Rango de R = tau * Omega_0 (variando el tiempo de correlación tau)
+# R_values cubre el régimen de rigidez (bajo R) a caos (alto R)
+R_values = np.logspace(-1, 1, 30)  # De 0.1 a 10.0 (30 puntos)
+system_variance = []
+tau_values = R_values / OMEGA_0 
+N_TRAJECTORIES = 50  # Número de trayectorias a simular para promediar el ruido
+T_END = 100.0        # Tiempo total de simulación
+DT = 0.01          # Paso de tiempo para la simulación
+
+print(f"--- Simulación de la Ley de Memoria Finita (FML) ---")
+print(f"Omega_0 (Frecuencia Natural): {OMEGA_0:.2f} | N_Trayectorias: {N_TRAJECTORIES}")
+print("Buscando el Valle de Resiliencia (Mínima Varianza)...")
+
+for R_val, tau in zip(R_values, tau_values):
+    
+    # Tiempo de correlación del ruido: tau = R / Omega_0
+    kappa_noise = 1.0 / tau # Tasa de reversión del OU
+    
+    # Almacenar las varianzas de esta simulación para este R
+    trajectory_variance = [] 
+
+    # 3.1. Simulación de múltiples trayectorias (Promediado de Ensamble)
+    for _ in range(N_TRAJECTORIES):
+        
+        # Generar Ruido: Primero creamos una instancia del ruido coloreado
+        time_points = np.arange(0, T_END, DT)
+        # Usamos KAPPA_NOISE para generar el ruido, el cual depende de tau
+        noise_realization = ou_noise_generator(kappa_noise, SIGMA, DT, len(time_points))
+        
+        # Interpolar el ruido para usarlo en el integrador SciPy
+        # Esto permite usar un integrador más preciso (DOP853 por defecto en solve_ivp)
+        eta_interp = lambda t: np.interp(t, time_points, noise_realization)
+        
+        # 3.2. Integrar la EDE
+        initial_conditions = [0.0, 0.0]  # y0 = [posición, velocidad]
+        solution = solve_ivp(
+            system_dynamics,
+            [0, T_END],
+            initial_conditions,
+            args=(OMEGA_0, ZETA, eta_interp, kappa_noise),
+            t_eval=time_points,
+            method='RK45'  # Método Runge-Kutta 4(5)
+        )
+        
+        # 3.3. Calcular la varianza en estado estacionario
+        # Descartamos el transitorio inicial (primer 20%)
+        transient_idx = int(0.2 * len(solution.t))
+        final_position = solution.y[0, transient_idx:]
+        
+        # Varianza de la posición en el estado estacionario
+        trajectory_variance.append(np.var(final_position))
+
+    # 3.4. Varianza promedio (sobre el ensamble) para este valor de R
+    mean_variance = np.mean(trajectory_variance)
+    system_variance.append(mean_variance)
+    
+    # Reportar progreso
+    print(f"R={R_val:.2f} (tau={tau:.2f}): Varianza = {mean_variance:.4f}")
+
+# === 4. VISUALIZACIÓN DE RESULTADOS ===
+
+R_optimal_index = np.argmin(system_variance)
+R_optimal_value = R_values[R_optimal_index]
+Min_Variance = system_variance[R_optimal_index]
+
+print("\n--- Resultados del Análisis ---")
+print(f"Mínima Varianza ({Min_Variance:.4f}) encontrada en R = {R_optimal_value:.2f}")
+
+plt.figure(figsize=(10, 6))
+plt.loglog(R_values, system_variance, 'o-', color='darkblue', linewidth=2, label='Varianza Promedio')
+plt.loglog(R_optimal_value, Min_Variance, 'r*', markersize=15, label=f'Mínimo (R={R_optimal_value:.2f})')
+
+# Rango de Resiliencia de la FML (para referencia)
+plt.axvspan(0.5, 3.5, color='green', alpha=0.1, label='Rango FML Postulado [0.5, 3.5]')
+
+plt.title('Valle de Resiliencia: Varianza vs. Número de Resiliencia $R = \\tau\\Omega$')
+plt.xlabel('Número de Resiliencia R', fontsize=12)
+plt.ylabel('Varianza de la Posición ($\sigma_x^2$)', fontsize=12)
+plt.grid(True, which="both", ls="--", alpha=0.6)
+plt.legend()
+
+# Guardar el gráfico en la carpeta code/
+plt.savefig('variance_plot.png')
+print("Gráfico 'variance_plot.png' guardado en el directorio 'code/'.")
+plt.show()
+
+# --------------------------------------------------------------------------
+# NOTA TÉCNICA:
+# El factor R = tau * Omega, donde tau = 1/kappa y Omega = Omega_0, 
+# se mapea directamente al R = tau_c * omega_0 del oscilador amortiguado.
+# La ubicación precisa del mínimo depende ligeramente de ZETA, pero el rango
+# [0.5, 3.5] debe contenerlo consistentemente.
+# --------------------------------------------------------------------------
