@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+title: The Finite Memory Law (FML)
+message: If you use this work, please cite it.
+authors:
+  - family-names: Cisneros
+    given-names: Ernesto
+license: CC0-1.0
+version: 0.1.0
