@@ -1,0 +1,21 @@
+# 📂 Documentación y Fundamento Teórico
+
+Esta carpeta contiene los documentos fundamentales del proyecto **The Finite Memory Law (FML)**, que en conjunto establecen la derivación teórica y el protocolo para su validación empírica.
+
+## 🧬 Genealogía de la Ley: Del Universo al Principio Universal
+
+La Ley de Memoria Finita ($R = \tau\Omega$) no es una conjetura empírica; es una restricción **matemáticamente necesaria** que emerge de un marco físico.
+
+| Documento | Enfoque Principal | Aporte Esencial |
+| :--- | :--- | :--- |
+| **`Del Espacio de Hilbert a la Cosmología Estocástica.pdf`** | **Origen Teórico.** | Demuestra la derivación de la FML a partir de un modelo cosmológico estocástico ($T_{GH}$ y ruido Ornstein-Uhlenbeck) y establece el rango óptimo de resiliencia. |
+| **`The Finite Memory Law Version 2.1 - Protocol.pdf`** | **Metodología y Falsabilidad.** | Define la hipótesis central, las **definiciones operacionales** de $\tau$ y $\Omega$ en Machine Learning, Clima, Fluidos y Neurociencia, y establece los criterios rigurosos para la validación/refutación. |
+| **`Apéndice.pdf`** | **Soporte Técnico.** | Incluye derivaciones matemáticas detalladas (espacio de Krein, análisis de Fokker-Planck) y el **código Python reproducible** para simular la minimización de la varianza. |
+
+**Para entender la hipótesis:** Comience leyendo el **`Protocol.pdf`** para conocer las definiciones y el método.
+
+**Para entender el origen:** Consulte el paper de **`Cosmología Estocástica.pdf`** para la justificación del parámetro $R$.
+
+---
+
+Todo el material está liberado bajo la **Licencia CC0 1.0 Universal (Dominio Público)**.
