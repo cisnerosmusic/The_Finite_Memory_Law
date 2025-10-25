@@ -1,1 +1,18 @@
+# 💻 Code: Reproducibilidad de la Ley de Memoria Finita (FML)
 
+Este directorio contiene el código Python para reproducir la **simulación canónica** del modelo estocástico. El objetivo es confirmar numéricamente que la **varianza de las trayectorias** del sistema es mínima cuando el número de resiliencia $R = \tau\Omega$ se encuentra cerca de $R \approx 2.0$.
+
+Esta simulación es el puente entre la derivación teórica y el protocolo de validación empírica.
+
+## Archivo Principal
+
+| Archivo | Descripción |
+| :--- | :--- |
+| **`wz_demo.py`** | Script autocontenido que simula la Ecuación Diferencial Estocástica (SDE) del oscilador amortiguado con ruido de Ornstein-Uhlenbeck (OU). Itera sobre un rango de valores $\tau$ para encontrar la región de mínima incertidumbre. |
+
+## 🛠️ Requisitos e Instalación
+
+Para ejecutar el código, solo necesita las librerías científicas estándar de Python:
+
+```bash
+pip install numpy scipy matplotlib
