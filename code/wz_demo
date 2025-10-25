@@ -146,9 +146,9 @@ plt.ylabel('Varianza de la Posición ($\sigma_x^2$)', fontsize=12)
 plt.grid(True, which="both", ls="--", alpha=0.6)
 plt.legend()
 
-# Guardar el gráfico en la carpeta code/
-plt.savefig('variance_plot.png')
-print("Gráfico 'variance_plot.png' guardado en el directorio 'code/'.")
+# [LÍNEA CORREGIDA PARA GUARDAR EN LA CARPETA 'media/']
+plt.savefig('../media/variance_plot.png')
+print("Gráfico 'variance_plot.png' guardado en el directorio 'media/'.")
 plt.show()
 
 # --------------------------------------------------------------------------
