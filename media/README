@@ -1,0 +1,11 @@
+# 📊 Media: Visualizaciones de la Simulación Canónica
+
+Este directorio contiene las **visualizaciones y resultados gráficos** generados por el código Python en la carpeta `code/`.
+
+### 🖼️ Contenido Clave
+
+* **`variance_plot.png`**: Gráfico principal generado por `code/wz_demo.py`. Muestra la relación entre el **Número de Resiliencia ($R = \tau\Omega$)** y la **Varianza de las Trayectorias** ($\sigma_x^2$), ilustrando el "Valle de Resiliencia" predicho por la Ley de Memoria Finita (FML).
+
+### 🔄 Reproducibilidad
+
+Si ejecuta el script `code/wz_demo.py` en su entorno local, el gráfico se actualizará automáticamente en esta carpeta, permitiendo una fácil verificación de la consistencia de los resultados.
