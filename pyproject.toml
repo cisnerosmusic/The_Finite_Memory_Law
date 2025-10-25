@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "finite-memory-law"
+version = "0.1.0"
+description = "Reproducible code for The Finite Memory Law (R = tau * Omega) simulation and CLI."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "CC0-1.0" }
+authors = [{ name = "Ernesto Cisneros" }]
+dependencies = [
+  "numpy>=1.26",
+  "scipy>=1.11",
+  "matplotlib>=3.8"
+]
+
+[project.scripts]
+fml = "fml.cli:main"
+
+[tool.setuptools]
+packages = ["fml"]
